@@ -1,2 +1,2 @@
-# Neural_Signal_Processing
-I share some of my codes while studying Mike Cohen`s book, Analyzing Neural Time Series Data.
+# Neural Signal Processing
+In this repository, I gather materials about neural signal processing wich I have learned from the book Analyzing Neural Time series Data by Dr. Mike X. Cohen.
