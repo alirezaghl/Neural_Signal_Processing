@@ -33,7 +33,8 @@ figure(2)
 plot(hz,chanpower(:,1:length(hz)), 'linew',2)
 set(gca,'xlim',[0 30], 'ylim', [0 50])
 
-% Topographical map
+% We want to extract the average power of alpha bands and
+% then make a topographical map of the distribution of this power.
 alphabounds = [8 12];
 freqidx = dsearchn(hz', alphabounds');
 alphapower = mean(chanpower(:,freqidx(1):freqidx(2)),2);
