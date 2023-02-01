@@ -30,8 +30,3 @@ for fi=1:length(frequencies)
     subplot(length(frequencies),1,fi);
     plot(time,sine_waves(fi,:))
 end
-
-
-
-
-
