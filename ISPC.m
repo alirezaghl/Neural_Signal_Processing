@@ -38,3 +38,54 @@ figure(4)
 plot(timevec,real_data)
 % Phase synchronization
 phase_synchronization = abs(mean(exp(1i*diff(phase_data))));
+
+%% Phase lag index and ISPC on EEG data
+
+load sampleEEGdata.mat
+chan1 = 'FCz';
+chan2 = 'POz';
+
+min_freq = 2;
+max_freq = 40;
+num_frex = 34;
+fwhm = linspace(.3,.1,num_frex);
+frex = logspace(log10(min_freq),log10(max_freq),num_frex);
+time = -2:1/EEG.srate:2-1/EEG.srate;
+half_wave = (length(time)-1)/2;
+nkern = length(time);
+ndata = EEG.pnts * EEG.trials;
+nconv = nkern  + ndata -1;
+fft_ch1 = fft(reshape(EEG.data(strcmpi(chan1,{EEG.chanlocs.labels}),:,:),1,EEG.pnts*EEG.trials),nconv);
+fft_ch2 = fft(reshape(EEG.data(strcmpi(chan2,{EEG.chanlocs.labels}),:,:),1,EEG.pnts*EEG.trials),nconv);
+ispc = deal(zeros(num_frex,EEG.pnts));
+PLI = deal(zeros(num_frex,EEG.pnts));
+
+for fi=1:length(frex)
+    cmw = exp(1i * 2 * pi * frex(fi) .* time) .* exp((-4 * log(2) * time.^2)./(fwhm(fi)^2));
+    cmwx = fft(cmw,nconv);
+    cmwx = cmwx ./ max(cmwx);
+    as1 = ifft(cmwx.*fft_ch1);
+    as1 = as1(half_wave+1:end-half_wave);
+    as1 = reshape(as1,EEG.pnts,EEG.trials);
+    as2 = ifft(cmwx.*fft_ch2);
+    as2 = as2(half_wave+1:end-half_wave);
+    as2 = reshape(as2,EEG.pnts,EEG.trials);
+    cdd = exp(1i*( angle(as1)-angle(as2)));
+    ispc(fi,:)  = abs(mean(cdd,2));
+    PLI(fi,:)   = abs(mean(sign(imag(cdd)),2));
+end
+
+figure(1)
+subplot(221)
+contourf(EEG.times,frex,ispc,40,'linecolor','none')
+set(gca,'xlim',[-300 1200],'clim',[0 .5])
+colormap hot; colorbar
+xlabel('Time (ms)'), ylabel('Frequency (Hz)')
+title('ISPC, voltage') 
+
+subplot(222)
+contourf(EEG.times,frex, PLI, 40, 'linecolor','none')
+set(gca,'xlim',[-300 1200],'clim',[0 .5])
+colormap hot; colorbar
+xlabel('Time (ms)'), ylabel('Frequency (Hz)')
+title('PLI, voltage')
